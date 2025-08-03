@@ -1,0 +1,109 @@
+.info-cards-section {
+  padding: 60px 0;
+  width: 100vw;
+}
+
+.info-cards-container {
+  display: flex;
+  justify-content: center;
+  align-items: stretch;   /* Ensures all cards stretch to the same height */
+  gap: 40px;
+  max-width: 1400px;
+  margin: 0 auto;
+  flex-wrap: wrap;
+}
+
+.info-card {
+  background: #222;
+  color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.10);
+  padding: 28px 18px 24px 18px;
+  width: 302px;
+  height: 346px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+.info-card h2 {
+  font-size: 1.5rem;
+  margin-bottom: 18px;
+  letter-spacing: 0.04em;
+}
+.info-card-img {
+  width: 120px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 6px;
+  margin-bottom: 14px;
+  background: #111;
+}
+.app-img {
+  width: 50px;
+  height: 100px;
+  object-fit: contain;
+  margin-bottom: 14px;
+}
+.info-card-price {
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin-bottom: 12px;
+}
+.info-card-link {
+  color: #fff;
+  text-decoration: underline;
+  margin-top: 10px;
+  font-weight: 500;
+}
+.postcode-form {
+  height: 30px;
+  display: flex;
+  width: 100%;
+  margin-top: 18px;
+  
+}
+.postcode-form input {
+  flex: 1;
+  padding: 10px 14px;
+  border: none;
+  border-radius: 4px 0 0 4px;
+  font-size: 1rem;
+  outline: none;
+}
+.postcode-form button {
+  background: #4be3c1;
+  color: #fff;
+  border: none;
+  border-radius: 0 4px 4px 0;
+  padding: 0 24px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.postcode-form button:hover {
+  background: #2fc2a0;
+}
+.app-buttons {
+  display: flex;
+  gap: 16px;
+  margin-top: 18px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.app-store-btn, .google-play-btn {
+  background: #111;
+  color: #fff;
+  border-radius: 6px;
+  padding: 10px 18px;
+  font-size: 1rem;
+  font-weight: 500;
+  text-decoration: none;
+  display: inline-block;
+  transition: background 0.2s;
+}
+.app-store-btn:hover, .google-play-btn:hover {
+  background: #4be3c1;
+  color: #111;
+} 

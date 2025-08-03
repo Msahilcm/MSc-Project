@@ -1,0 +1,121 @@
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  z-index: 100;
+  background: transparent;
+  font-family: 'Arial', sans-serif;
+  box-sizing: border-box;
+  border-bottom: none;
+  padding: 0;
+}
+.header__row {
+  width: 100vw;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+  padding: 30px 60px 0 60px;
+  min-height: 120px;
+}
+.header__left {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  flex: 0 0 auto;
+}
+.header__logo-img {
+  height: 100px;
+  max-height: 100px;
+  width: auto;
+  display: block;
+  object-fit: contain;
+  pointer-events: auto;
+  margin-left: 68px;
+}
+.header__right {
+  display: flex;
+  align-items: center;
+  gap: 36px;
+  flex: 0 0 auto;
+  margin-right: 77px;
+}
+.header__search {
+  flex: 1 1 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0 36px;
+}
+.header__search input {
+  border: none;
+  border-bottom: 1px solid #111;
+  background: transparent;
+  font-size: 1.1rem;
+  padding: 1px 10px;
+  outline: none;
+  width: 248px;
+  text-align: center;
+}
+.header__nav--top {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+  font-size: 1rem;
+}
+.header__nav--top a {
+  color: #111;
+  text-decoration: none;
+  font-weight: 400;
+  letter-spacing: 0.05em;
+}
+
+.header--white-text,
+.header--white-text .header__logo,
+.header--white-text .header__nav a,
+.header--white-text .header__search input {
+  color: #fff !important;
+  border-color: #fff !important;
+}
+
+.header--white-text .header__search input {
+  background: transparent;
+}
+
+.header--white-text .menu-icon-bar {
+  background: #fff !important;
+}
+.header--white-text .hamburger-icon span {
+  background: #e8e6e3  !important;
+}
+.header--white-text .close-icon span {
+  background: #e8e6e3  !important;
+}
+.header--white-text .header__nav--top a {
+  color: #e8e6e3  !important;
+}
+.header--white-text .header__search input {
+  color: #e8e6e3  !important;
+  border-color: #e8e6e3 !important;
+}
+
+.header__user-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 32px;
+  width: 32px;
+  background: transparent;
+  border-radius: 50%;
+  overflow: hidden;
+  /* border: 2px solid #fff; */
+}
+
+.header__user-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  display: block;
+} 

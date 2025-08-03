@@ -1,0 +1,135 @@
+.main-showcase-vertical {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 48px;
+  width: 100vw;
+  margin-top: 165px;
+  position: relative;
+}
+
+.fixed-arrow {
+  position: fixed;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  font-size: 2.5rem;
+  color: #111;
+  cursor: pointer;
+  padding: 0 24px;
+  transition: color 0.2s;
+  user-select: none;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+}
+.fixed-left-arrow {
+  left: 40px;
+}
+.fixed-right-arrow {
+  right: 40px;
+}
+.fixed-arrow:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+/* Hide per-image arrows */
+.arrow {
+  display: none;
+}
+
+.main-showcase-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  min-height: 70vh;
+  gap: 24px;
+}
+
+.showcase-image-wrapper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.showcase-image {
+  width: 700px;
+  height: 400px;
+  object-fit: cover;
+  border-radius: 0;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+  transition: transform 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.showcase-image.clickable {
+  cursor: pointer;
+  transition: transform 0.5s cubic-bezier(0.23, 1, 0.32, 1), box-shadow 0.3s ease;
+}
+
+.showcase-image.clickable:hover {
+  transform: scale(1.05);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+.zoom-in {
+  transform: scale(1.08);
+  z-index: 2;
+}
+
+.zoom-in.clickable:hover {
+  transform: scale(1.12);
+  box-shadow: 0 12px 35px rgba(0,0,0,0.2);
+}
+.zoom-out {
+  transform: scale(0.96);
+  opacity: 0.85;
+  z-index: 1;
+}
+@media (max-width: 900px) {
+  .showcase-image {
+    width: 90vw;
+    height: 40vw;
+    min-width: 180px;
+    min-height: 180px;
+  }
+  .main-showcase-container {
+    min-height: 40vh;
+    flex-direction: column;
+    gap: 0;
+  }
+  .fixed-left-arrow {
+    left: 10px;
+  }
+  .fixed-right-arrow {
+    right: 10px;
+  }
+  .fixed-arrow {
+    font-size: 2rem;
+    padding: 0 10px;
+  }
+} 
+
+.slide-dots {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 18px;
+  gap: 10px;
+}
+.dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #bbb;
+  display: inline-block;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+}
+.dot.active {
+  background: #111;
+  transform: scale(1.2);
+} 

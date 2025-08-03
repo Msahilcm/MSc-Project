@@ -1,0 +1,153 @@
+.registerform-page-container {
+  display: flex;
+  min-height: 100vh;
+  width: 100vw;
+  background: #fff;
+  margin-top: 0;
+  font-family: 'Arial', sans-serif;
+}
+.registerform-left {
+  flex: 0 0 600px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  padding: 0 60px;
+  background: #fff;
+  min-height: 100vh;
+  position: relative;
+}
+.registerform-left h2 {
+  font-size: 1.2rem;
+  font-weight: 400;
+  margin-bottom: 48px;
+  letter-spacing: 0.05em;
+  margin-left: 0;
+  margin-top: 120px;
+}
+.registerform-form {
+  width: 95%;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 32px;
+  margin-top: 0;
+}
+.registerform-form label {
+  font-size: 1rem;
+  color: #222;
+  margin-bottom: 4px;
+  margin-top: 28px;
+  letter-spacing: 0.05em;
+  font-weight: 400;
+}
+.registerform-form input {
+  border: none;
+  border-bottom: 1px solid #aaa;
+  background: transparent;
+  font-size: 1.1rem;
+  padding: 10px 0 8px 0;
+  margin-bottom: 8px;
+  outline: none;
+  color: #222;
+  width: 100%;
+}
+.registerform-phone-row {
+  display: flex;
+  gap: 16px;
+  margin-top: 28px;
+  margin-bottom: 8px;
+}
+.registerform-prefix {
+  flex: 0 0 80px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+.registerform-prefix input {
+  font-weight: bold;
+  color: #111;
+  width: 60px;
+}
+.registerform-telephone {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+.registerform-sms-info {
+  font-size: 1rem;
+  color: #222;
+  margin: 32px 0 24px 0;
+}
+.register-btn {
+  width: 100%;
+  padding: 16px 0;
+  font-size: 1.1rem;
+  font-weight: 500;
+  border: 1px solid #111;
+  background: #111;
+  color: #fff;
+  cursor: pointer;
+  margin-bottom: 18px;
+  transition: background 0.2s, color 0.2s;
+  letter-spacing: 0.05em;
+}
+.register-btn:hover {
+  background: #f4f4f4;
+  color: #111;
+}
+
+.error-message {
+  color: #d32f2f;
+  font-size: 0.9rem;
+  margin: 8px 0;
+  padding: 8px 12px;
+  background: #ffebee;
+  border: 1px solid #ffcdd2;
+  border-radius: 4px;
+}
+
+.register-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.registerform-right {
+  flex: 1;
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  background: #fff;
+  min-height: 100vh;
+}
+.registerform-img {
+  width: 100%;
+  height: 100vh;
+  object-fit: cover;
+  background: #fff;
+  border-radius: 0;
+  box-shadow: none;
+  display: block;
+  margin-top: 114px;
+  padding-top: 10px;
+}
+@media (max-width: 900px) {
+  .registerform-page-container {
+    flex-direction: column;
+    align-items: center;
+    margin-top: 0;
+  }
+  .registerform-left, .registerform-right {
+    flex: unset;
+    width: 100vw;
+    align-items: center;
+    padding: 0 10px;
+    min-height: unset;
+  }
+  .registerform-img {
+    width: 100vw;
+    height: 50vw;
+    min-width: 180px;
+    min-height: 180px;
+  }
+} 
