@@ -2,6 +2,7 @@ const Product = require('../models/Product');
 const { validationResult } = require('express-validator');
 const fs = require('fs');
 const path = require('path');
+const Review = require('../models/Review');
 
 // Get all products
 const getAllProducts = async (req, res) => {
@@ -121,8 +122,20 @@ const updateProduct = async (req, res) => {
 
     console.log('Existing product:', existingProduct);
 
-    // Handle file uploads - combine new uploads with existing images
-    let imageUrls = [...(existingProduct.images || [])];
+    // Handle file uploads - use existingImages from frontend and add new uploads
+    let imageUrls = [];
+    
+    // Add existing images that should be kept
+    if (req.body.existingImages) {
+      try {
+        const existingImages = JSON.parse(req.body.existingImages);
+        imageUrls = [...existingImages];
+      } catch (error) {
+        console.error('Error parsing existingImages:', error);
+      }
+    }
+    
+    // Add new uploaded images
     if (req.files && req.files.length > 0) {
       const newImageUrls = req.files.map(file => `/uploads/${file.filename}`);
       imageUrls = [...imageUrls, ...newImageUrls];
@@ -190,10 +203,38 @@ const deleteProduct = async (req, res) => {
   }
 };
 
+// Get all reviews for a product
+const getProductReviews = async (req, res) => {
+  try {
+    const productId = req.params.id;
+    const reviews = await Review.findByProductId(productId);
+    res.json({ success: true, data: reviews });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Failed to fetch reviews', error: error.message });
+  }
+};
+
+// Add a review for a product
+const addProductReview = async (req, res) => {
+  try {
+    const productId = req.params.id;
+    const { user_name, rating, comment } = req.body;
+    if (!user_name || !rating || rating < 1 || rating > 5) {
+      return res.status(400).json({ success: false, message: 'Name and valid rating (1-5) required' });
+    }
+    await Review.create({ product_id: productId, user_name, rating, comment });
+    res.json({ success: true, message: 'Review added successfully' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Failed to add review', error: error.message });
+  }
+};
+
 module.exports = {
   getAllProducts,
   getProductById,
   createProduct,
   updateProduct,
-  deleteProduct
+  deleteProduct,
+  getProductReviews,
+  addProductReview,
 }; 

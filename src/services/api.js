@@ -101,6 +101,127 @@ export const productAPI = {
       console.error('Error deleting product:', error);
       return { success: false, message: error.message };
     }
+  },
+  // Get product reviews
+  getProductReviews: async (productId) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/products/${productId}/reviews`);
+      return await response.json();
+    } catch (error) {
+      return { success: false, message: error.message };
+    }
+  },
+  // Add product review
+  addProductReview: async (productId, review) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/products/${productId}/reviews`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(review)
+      });
+      return await response.json();
+    } catch (error) {
+      return { success: false, message: error.message };
+    }
+  }
+};
+
+// Order API calls
+export const orderAPI = {
+  // Get all orders (admin only)
+  getAllOrders: async (token) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/orders`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching orders:', error);
+      return { success: false, message: error.message };
+    }
+  },
+
+  // Get order by ID
+  getOrderById: async (id, token) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/orders/${id}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching order:', error);
+      return { success: false, message: error.message };
+    }
+  },
+
+  // Create new order
+  createOrder: async (orderData, token) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/orders`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(orderData)
+      });
+      return await response.json();
+    } catch (error) {
+      console.error('Error creating order:', error);
+      return { success: false, message: error.message };
+    }
+  },
+
+  // Update order status (admin only)
+  updateOrderStatus: async (id, status, token) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/orders/${id}/status`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ status })
+      });
+      return await response.json();
+    } catch (error) {
+      console.error('Error updating order status:', error);
+      return { success: false, message: error.message };
+    }
+  },
+
+  // Get user's orders
+  getUserOrders: async (token) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/orders/user/orders`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching user orders:', error);
+      return { success: false, message: error.message };
+    }
+  },
+
+  // Get order statistics (admin only)
+  getOrderStatistics: async (token) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/orders/statistics`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching order statistics:', error);
+      return { success: false, message: error.message };
+    }
   }
 };
 
@@ -116,7 +237,11 @@ export const authAPI = {
         },
         body: JSON.stringify(credentials)
       });
-      return await response.json();
+      const data = await response.json();
+      if (data.success && data.data && data.data.user && data.data.user.name) {
+        localStorage.setItem('userName', data.data.user.name);
+      }
+      return data;
     } catch (error) {
       console.error('Error logging in:', error);
       return { success: false, message: error.message };
@@ -151,6 +276,98 @@ export const authAPI = {
       return await response.json();
     } catch (error) {
       console.error('Error fetching profile:', error);
+      return { success: false, message: error.message };
+    }
+  },
+
+  // Get all users (admin only)
+  getAllUsers: async (token) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/users`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching users:', error);
+      return { success: false, message: error.message };
+    }
+  }
+};
+
+// Favorites API calls
+export const favoriteAPI = {
+  // Add product to favorites
+  addToFavorites: async (productId, token) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/favorites/${productId}`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      if (!response.ok) {
+        throw new Error('Failed to add to favorites');
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('Error adding to favorites:', error);
+      return { success: false, message: error.message };
+    }
+  },
+
+  // Remove product from favorites
+  removeFromFavorites: async (productId, token) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/favorites/${productId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      if (!response.ok) {
+        throw new Error('Failed to remove from favorites');
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('Error removing from favorites:', error);
+      return { success: false, message: error.message };
+    }
+  },
+
+  // Get user's favorite products
+  getUserFavorites: async (token) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/favorites`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      if (!response.ok) {
+        throw new Error('Failed to fetch favorites');
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching favorites:', error);
+      return { success: false, message: error.message };
+    }
+  },
+
+  // Check if product is favorited by user
+  checkIfFavorited: async (productId, token) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/favorites/${productId}/check`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      if (!response.ok) {
+        throw new Error('Failed to check favorite status');
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('Error checking favorite status:', error);
       return { success: false, message: error.message };
     }
   }

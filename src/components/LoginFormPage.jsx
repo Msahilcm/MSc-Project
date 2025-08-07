@@ -38,6 +38,10 @@ const LoginFormPage = () => {
       const data = await response.json();
 
       if (response.ok) {
+        // Store userName for both admin and regular users
+        if (data.data && data.data.user && data.data.user.name) {
+          localStorage.setItem('userName', data.data.user.name);
+        }
         // Check if this is an admin user
         if (data.data.user.isAdmin) {
           // Store admin data

@@ -70,8 +70,9 @@
 .product-image {
   width: 100%;
   max-width: 200px;
-  height: auto;
+  height: 100px;
   object-fit: contain;
+  display: block;
   transition: transform 0.3s ease;
 }
 

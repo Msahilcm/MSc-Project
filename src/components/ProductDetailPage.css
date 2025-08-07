@@ -412,6 +412,108 @@
   line-height: 1.4;
 }
 
+/* Review Section */
+.review-section {
+  margin-top: 2.5rem;
+  padding: 2rem;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  max-width: 700px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.review-section h2 {
+  font-size: 1.4rem;
+  font-weight: 600;
+  margin-bottom: 1.2rem;
+}
+.review-list {
+  margin-bottom: 2rem;
+}
+.review-item {
+  border-bottom: 1px solid #e9ecef;
+  padding: 1rem 0;
+}
+.review-header {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  margin-bottom: 0.3rem;
+}
+.review-user {
+  font-weight: 600;
+  color: #3B82F6;
+}
+.review-rating {
+  color: #F59E0B;
+  font-size: 1.1rem;
+  letter-spacing: 1px;
+}
+.review-date {
+  color: #888;
+  font-size: 0.95rem;
+  margin-left: auto;
+}
+.review-comment {
+  color: #22223b;
+  font-size: 1.05rem;
+  margin-left: 0.1rem;
+}
+.review-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  margin-top: 1.5rem;
+}
+.review-form h3 {
+  font-size: 1.1rem;
+  font-weight: 500;
+  margin-bottom: 0.2rem;
+}
+.review-input {
+  padding: 0.5rem 0.8rem;
+  border: 1px solid #bfc9d1;
+  border-radius: 5px;
+  font-size: 1rem;
+}
+.review-submit-btn {
+  background: #10B981;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  padding: 0.6rem 1.2rem;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.review-submit-btn:disabled {
+  background: #b5e4d0;
+  cursor: not-allowed;
+}
+.review-error {
+  color: #d90429;
+  margin-top: 0.5rem;
+  font-size: 1rem;
+}
+.review-success {
+  color: #10B981;
+  margin-top: 0.5rem;
+  font-size: 1rem;
+}
+.review-loading {
+  color: #888;
+  margin-bottom: 1rem;
+  font-size: 1rem;
+}
+@media (max-width: 700px) {
+  .review-section {
+    padding: 1rem;
+    max-width: 100%;
+  }
+}
+
 /* Responsive Design */
 @media (max-width: 1024px) {
   .product-detail-content {
@@ -479,4 +581,46 @@
     height: 35px;
     font-size: 0.7rem;
   }
+} 
+
+/* Star rating UI */
+.star {
+  color: #ccc;
+  font-size: 1.2rem;
+  transition: color 0.2s;
+  margin-right: 2px;
+  cursor: pointer;
+  user-select: none;
+}
+.star.filled {
+  color: #F59E0B;
+}
+.star-input {
+  display: flex;
+  gap: 0.1rem;
+  margin-bottom: 0.7rem;
+  font-size: 1.5rem;
+}
+.average-rating {
+  display: flex;
+  align-items: center;
+  gap: 1.1rem;
+  margin-bottom: 1.2rem;
+}
+.average-stars {
+  display: flex;
+  align-items: center;
+}
+.review-count {
+  color: #555;
+  font-size: 1.05rem;
+  font-weight: 500;
+}
+.review-rating .star {
+  font-size: 1.1rem;
+  margin-right: 1px;
+  cursor: default;
+}
+.review-rating .star.filled {
+  color: #F59E0B;
 } 

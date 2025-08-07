@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 const { validationResult } = require('express-validator');
 const User = require('../models/User');
+const pool = require('../config/database').pool;
 
 // Generate JWT token
 const generateToken = (userId) => {
@@ -338,6 +339,69 @@ const debugUser = async (req, res) => {
   }
 };
 
+// Get all users (admin only)
+const getAllUsers = async (req, res) => {
+  try {
+    // Check if user is admin
+    if (!req.userId) {
+      return res.status(401).json({
+        success: false,
+        message: 'Authentication required'
+      });
+    }
+
+    const user = await User.findById(req.userId);
+    if (!user || !user.isAdmin) {
+      return res.status(403).json({
+        success: false,
+        message: 'Admin access required'
+      });
+    }
+
+    // Get all users (excluding password field for security)
+    const [users] = await pool.execute(`
+      SELECT id, email, name, surname, phone_prefix, telephone, profile_image, isAdmin, created_at 
+      FROM users 
+      ORDER BY created_at DESC
+    `);
+
+    res.json({
+      success: true,
+      message: 'Users retrieved successfully',
+      data: users
+    });
+  } catch (error) {
+    console.error('Get all users error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to retrieve users',
+      error: error.message
+    });
+  }
+};
+
+// Delete any user by admin (admin only)
+const deleteUserByAdmin = async (req, res) => {
+  try {
+    const adminUser = await User.findById(req.userId);
+    if (!adminUser || !adminUser.isAdmin) {
+      return res.status(403).json({ success: false, message: 'Admin access required' });
+    }
+    const userId = req.params.id;
+    if (parseInt(userId) === req.userId) {
+      return res.status(400).json({ success: false, message: 'Admin cannot delete themselves' });
+    }
+    const deleted = await User.delete(userId);
+    if (!deleted) {
+      return res.status(404).json({ success: false, message: 'User not found or already deleted' });
+    }
+    res.json({ success: true, message: 'User deleted successfully' });
+  } catch (error) {
+    console.error('Admin delete user error:', error);
+    res.status(500).json({ success: false, message: 'Failed to delete user', error: error.message });
+  }
+};
+
 module.exports = {
   register,
   login,
@@ -346,5 +410,7 @@ module.exports = {
   deleteAccount,
   changePassword,
   uploadProfileImage,
-  debugUser
+  debugUser,
+  getAllUsers,
+  deleteUserByAdmin
 }; 

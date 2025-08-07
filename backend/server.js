@@ -3,6 +3,8 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 const authRoutes = require('./routes/auth');
 const productRoutes = require('./routes/products');
+const orderRoutes = require('./routes/orders');
+const favoriteRoutes = require('./routes/favorites');
 const { initDatabase } = require('./config/database');
 const path = require('path');
 
@@ -21,6 +23,8 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
+app.use('/api/orders', orderRoutes);
+app.use('/api/favorites', favoriteRoutes);
 
 // Health check route
 app.get('/api/health', (req, res) => {

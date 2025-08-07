@@ -7,7 +7,7 @@ import './ProductPage.css';
 
 const ProductPage = () => {
   const [selectedFilters, setSelectedFilters] = useState({
-    headphoneType: '',
+    category: '',
     price: '',
     review: '',
     color: '',

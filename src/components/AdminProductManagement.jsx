@@ -164,14 +164,24 @@ const AdminProductManagement = () => {
        console.log('Valid colors for update submission:', validColors);
        formData.append('colors', JSON.stringify(validColors));
 
-      // Append each image file (only new files)
-      let newImageCount = 0;
-      editingProduct.images.forEach((file, index) => {
-        if (file instanceof File) {
-          formData.append('images', file);
-          newImageCount++;
+      // Handle images: separate existing images from new file uploads
+      const existingImages = [];
+      const newImages = [];
+      
+      editingProduct.images.forEach((image, index) => {
+        if (image instanceof File) {
+          // This is a new file upload
+          newImages.push(image);
+          formData.append('images', image);
+        } else if (typeof image === 'string' && image.startsWith('/uploads/')) {
+          // This is an existing image URL that should be kept
+          existingImages.push(image);
         }
+        // If image is null/undefined, it was removed and should be excluded
       });
+
+      // Send the list of existing images to keep
+      formData.append('existingImages', JSON.stringify(existingImages));
 
       console.log('FormData created with:', {
         name: editingProduct.name,
@@ -180,8 +190,9 @@ const AdminProductManagement = () => {
         monthly_price: parseFloat(editingProduct.monthlyPrice),
         category: editingProduct.category,
         stock: parseInt(editingProduct.stock),
-        colors: editingProduct.colors.filter(color => color.trim() !== ''),
-        newImageCount
+        colors: validColors,
+        existingImages: existingImages.length,
+        newImages: newImages.length
       });
 
       console.log('Sending update request for product ID:', editingProduct.id);
@@ -220,7 +231,15 @@ const AdminProductManagement = () => {
   const handleEditColorStockChange = (index, value) => {
     const newColors = [...editingProduct.colors];
     newColors[index] = { ...newColors[index], stock: parseInt(value) || 0 };
-    setEditingProduct({ ...editingProduct, colors: newColors });
+    
+    // Calculate total stock from all colors
+    const totalStock = newColors.reduce((sum, color) => sum + (parseInt(color.stock) || 0), 0);
+    
+    setEditingProduct({ 
+      ...editingProduct, 
+      colors: newColors,
+      stock: totalStock.toString() // Update the main stock field
+    });
   };
 
   const handleEditImageChange = (index, file) => {
@@ -230,7 +249,14 @@ const AdminProductManagement = () => {
   };
 
   const addEditColorField = () => {
-    setEditingProduct({ ...editingProduct, colors: [...editingProduct.colors, { name: '', stock: '' }] });
+    const newColors = [...editingProduct.colors, { name: '', stock: '' }];
+    const totalStock = newColors.reduce((sum, color) => sum + (parseInt(color.stock) || 0), 0);
+    
+    setEditingProduct({ 
+      ...editingProduct, 
+      colors: newColors,
+      stock: totalStock.toString()
+    });
   };
 
   const addEditImageField = () => {
@@ -242,6 +268,17 @@ const AdminProductManagement = () => {
     setEditingProduct({ ...editingProduct, images: newImages });
   };
 
+  const removeEditColor = (index) => {
+    const newColors = editingProduct.colors.filter((_, i) => i !== index);
+    const totalStock = newColors.reduce((sum, color) => sum + (parseInt(color.stock) || 0), 0);
+    
+    setEditingProduct({ 
+      ...editingProduct, 
+      colors: newColors,
+      stock: totalStock.toString()
+    });
+  };
+
   const handleColorChange = (index, value) => {
     const newColors = [...newProduct.colors];
     newColors[index] = { ...newColors[index], name: value };
@@ -251,7 +288,15 @@ const AdminProductManagement = () => {
   const handleColorStockChange = (index, value) => {
     const newColors = [...newProduct.colors];
     newColors[index] = { ...newColors[index], stock: parseInt(value) || 0 };
-    setNewProduct({ ...newProduct, colors: newColors });
+    
+    // Calculate total stock from all colors
+    const totalStock = newColors.reduce((sum, color) => sum + (parseInt(color.stock) || 0), 0);
+    
+    setNewProduct({ 
+      ...newProduct, 
+      colors: newColors,
+      stock: totalStock.toString() // Update the main stock field
+    });
   };
 
   const handleImageChange = (index, file) => {
@@ -261,7 +306,14 @@ const AdminProductManagement = () => {
   };
 
   const addColorField = () => {
-    setNewProduct({ ...newProduct, colors: [...newProduct.colors, { name: '', stock: '' }] });
+    const newColors = [...newProduct.colors, { name: '', stock: '' }];
+    const totalStock = newColors.reduce((sum, color) => sum + (parseInt(color.stock) || 0), 0);
+    
+    setNewProduct({ 
+      ...newProduct, 
+      colors: newColors,
+      stock: totalStock.toString()
+    });
   };
 
   const addImageField = () => {
@@ -271,6 +323,17 @@ const AdminProductManagement = () => {
   const removeImage = (index) => {
     const newImages = newProduct.images.filter((_, i) => i !== index);
     setNewProduct({ ...newProduct, images: newImages });
+  };
+
+  const removeColor = (index) => {
+    const newColors = newProduct.colors.filter((_, i) => i !== index);
+    const totalStock = newColors.reduce((sum, color) => sum + (parseInt(color.stock) || 0), 0);
+    
+    setNewProduct({ 
+      ...newProduct, 
+      colors: newColors,
+      stock: totalStock.toString()
+    });
   };
 
   return (
@@ -319,11 +382,11 @@ const AdminProductManagement = () => {
                   required
                 >
                   <option value="">Select Category</option>
-                  <option value="Sofa">Sofa</option>
-                  <option value="Chair">Chair</option>
-                  <option value="Table">Table</option>
-                  <option value="Bed">Bed</option>
-                  <option value="Storage">Storage</option>
+                  <option value="LIVING ROOM">LIVING ROOM</option>
+                  <option value="BED ROOM">BED ROOM</option>
+                  <option value="KITCHEN">KITCHEN</option>
+                  <option value="HALLWAY">HALLWAY</option>
+                  <option value="OFFICE">OFFICE</option>
                 </select>
               </div>
             </div>
@@ -349,12 +412,12 @@ const AdminProductManagement = () => {
                   />
                 </div>
               <div className="form-group">
-                <label>Stock Quantity</label>
+                <label>Stock Quantity (Auto-calculated)</label>
                 <input
                   type="number"
                   value={newProduct.stock}
-                  onChange={(e) => setNewProduct({...newProduct, stock: e.target.value})}
-                  required
+                  readOnly
+                  className="readonly-input"
                 />
               </div>
             </div>
@@ -378,6 +441,15 @@ const AdminProductManagement = () => {
                       min="0"
                       required
                     />
+                    {newProduct.colors.length > 1 && (
+                      <button 
+                        type="button" 
+                        onClick={() => removeColor(index)} 
+                        className="remove-color-btn"
+                      >
+                        ×
+                      </button>
+                    )}
                   </div>
                 ))}
                 <button type="button" onClick={addColorField} className="add-field-btn">
@@ -452,11 +524,11 @@ const AdminProductManagement = () => {
                    required
                  >
                    <option value="">Select Category</option>
-                   <option value="Sofa">Sofa</option>
-                   <option value="Chair">Chair</option>
-                   <option value="Table">Table</option>
-                   <option value="Bed">Bed</option>
-                   <option value="Storage">Storage</option>
+                   <option value="LIVING ROOM">LIVING ROOM</option>
+                   <option value="BED ROOM">BED ROOM</option>
+                   <option value="KITCHEN">KITCHEN</option>
+                   <option value="HALLWAY">HALLWAY</option>
+                   <option value="OFFICE">OFFICE</option>
                  </select>
                </div>
              </div>
@@ -482,12 +554,12 @@ const AdminProductManagement = () => {
                   />
                 </div>
                <div className="form-group">
-                 <label>Stock Quantity</label>
+                 <label>Stock Quantity (Auto-calculated)</label>
                  <input
                    type="number"
                    value={editingProduct.stock}
-                   onChange={(e) => setEditingProduct({...editingProduct, stock: e.target.value})}
-                   required
+                   readOnly
+                   className="readonly-input"
                  />
                </div>
              </div>
@@ -511,6 +583,15 @@ const AdminProductManagement = () => {
                       min="0"
                       required
                     />
+                    {editingProduct.colors.length > 1 && (
+                      <button 
+                        type="button" 
+                        onClick={() => removeEditColor(index)} 
+                        className="remove-color-btn"
+                      >
+                        ×
+                      </button>
+                    )}
                   </div>
                 ))}
                 <button type="button" onClick={addEditColorField} className="add-field-btn">

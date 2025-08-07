@@ -32,8 +32,36 @@ const ProductGrid = ({ selectedFilters, sortBy }) => {
 
   // Filter products based on selected filters
   const filteredProducts = products.filter(product => {
-    // Add your filtering logic here based on selectedFilters
-    return true; // For now, show all products
+    // Furniture filter (category)
+    if (selectedFilters.category && product.category !== selectedFilters.category) {
+      return false;
+    }
+
+    // Price filter
+    if (selectedFilters.price) {
+      const price = parseFloat(product.price);
+      switch (selectedFilters.price) {
+        case 'Under $50':
+          if (price >= 50) return false;
+          break;
+        case '$50-$100':
+          if (price < 50 || price > 100) return false;
+          break;
+        case '$100-$200':
+          if (price < 100 || price > 200) return false;
+          break;
+        case '$200-$500':
+          if (price < 200 || price > 500) return false;
+          break;
+        case 'Over $500':
+          if (price <= 500) return false;
+          break;
+        default:
+          break;
+      }
+    }
+
+    return true;
   });
 
   // Sort products based on sortBy

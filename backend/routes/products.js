@@ -76,4 +76,8 @@ router.post('/', authenticateToken, upload.array('images', 5), productValidation
 router.put('/:id', authenticateToken, upload.array('images', 5), updateProductValidation, productController.updateProduct);
 router.delete('/:id', authenticateToken, productController.deleteProduct);
 
+// Product reviews
+router.get('/:id/reviews', productController.getProductReviews);
+router.post('/:id/reviews', productController.addProductReview);
+
 module.exports = router; 

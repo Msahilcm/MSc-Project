@@ -52,6 +52,49 @@ const initDatabase = async () => {
       )
     `);
 
+    // Create orders table
+    await connection.execute(`
+      CREATE TABLE IF NOT EXISTS orders (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT NOT NULL,
+        product_id INT NOT NULL,
+        quantity INT NOT NULL DEFAULT 1,
+        total_amount DECIMAL(10,2) NOT NULL,
+        status ENUM('pending', 'processing', 'shipped', 'delivered', 'cancelled') DEFAULT 'pending',
+        shipping_address TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+        FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
+      )
+    `);
+
+    // Create reviews table
+    await connection.execute(`
+      CREATE TABLE IF NOT EXISTS reviews (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        product_id INT NOT NULL,
+        user_name VARCHAR(100) NOT NULL,
+        rating INT NOT NULL CHECK (rating >= 1 AND rating <= 5),
+        comment TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
+      )
+    `);
+
+    // Create favorites table
+    await connection.execute(`
+      CREATE TABLE IF NOT EXISTS favorites (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT NOT NULL,
+        product_id INT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE KEY unique_user_product (user_id, product_id),
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+        FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
+      )
+    `);
+
     // Check if admin user exists, if not create one
     const [adminUsers] = await connection.execute(
       'SELECT * FROM users WHERE email = ?',

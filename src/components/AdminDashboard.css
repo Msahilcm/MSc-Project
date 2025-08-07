@@ -87,6 +87,36 @@
   margin-bottom: 2rem;
 }
 
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.refresh-btn {
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.refresh-btn:hover:not(:disabled) {
+  background-color: #2563eb;
+}
+
+.refresh-btn:disabled {
+  background-color: #9ca3af;
+  cursor: not-allowed;
+}
+
 .main-title {
   font-size: 2rem;
   font-weight: bold;
@@ -103,7 +133,7 @@
 /* KPI Cards */
 .kpi-section {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 1.5rem;
   margin-bottom: 2rem;
 }
@@ -124,6 +154,30 @@
   box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
 }
 
+.kpi-card.clickable {
+  cursor: pointer;
+}
+
+.kpi-card.clickable {
+  cursor: pointer;
+  position: relative;
+}
+
+.kpi-card.clickable:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 20px rgba(0, 0, 0, 0.15);
+}
+
+.kpi-card.clickable::after {
+  content: 'Click to view';
+  position: absolute;
+  bottom: 0.5rem;
+  right: 0.5rem;
+  font-size: 0.7rem;
+  opacity: 0.7;
+  color: inherit;
+}
+
 .kpi-content {
   flex: 1;
 }
@@ -140,6 +194,12 @@
   font-size: 1.8rem;
   font-weight: bold;
   margin: 0;
+}
+
+.kpi-subtitle {
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin-top: 0.25rem;
 }
 
 .kpi-icon {
@@ -236,6 +296,41 @@
   color: #1d4ed8;
 }
 
+.status-badge.in-stock {
+  background-color: #dcfce7;
+  color: #166534;
+}
+
+.status-badge.low-stock {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.status-badge.pending {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.status-badge.processing {
+  background-color: #dbeafe;
+  color: #1d4ed8;
+}
+
+.status-badge.shipped {
+  background-color: #e0e7ff;
+  color: #3730a3;
+}
+
+.status-badge.delivered {
+  background-color: #dcfce7;
+  color: #166534;
+}
+
+.status-badge.cancelled {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
 .action-buttons {
   display: flex;
   gap: 0.5rem;
@@ -253,6 +348,24 @@
 
 .action-btn:hover {
   background-color: #f3f4f6;
+}
+
+/* Loading and Empty States */
+.loading-message {
+  text-align: center;
+  padding: 2rem;
+  color: #6b7280;
+  font-size: 1rem;
+}
+
+.no-orders-message {
+  text-align: center;
+  padding: 2rem;
+  color: #6b7280;
+  font-size: 1rem;
+  background-color: #f9fafb;
+  border-radius: 8px;
+  border: 2px dashed #d1d5db;
 }
 
 /* Bottom Elements */
@@ -299,6 +412,166 @@
   font-size: 0.8rem;
 }
 
+/* User Management Section */
+.users-section {
+  margin: 2rem 0;
+  padding: 2rem;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+
+.users-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  color: #22223b;
+}
+
+.users-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: #f8f9fa;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+}
+
+.users-table th, .users-table td {
+  padding: 0.85rem 1.2rem;
+  text-align: left;
+}
+
+.users-table th {
+  background: #e9ecef;
+  font-weight: 700;
+  color: #22223b;
+  border-bottom: 2px solid #dee2e6;
+}
+
+.users-table tr:nth-child(even) {
+  background: #f1f3f5;
+}
+
+.users-table tr:nth-child(odd) {
+  background: #fff;
+}
+
+.users-table td {
+  border-bottom: 1px solid #e9ecef;
+  vertical-align: middle;
+}
+
+.action-btn.delete-btn {
+  background: #e8e6e3;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 0.4rem 0.8rem;
+  cursor: pointer;
+  font-size: 1.1rem;
+  transition: background 0.2s;
+}
+.action-btn.delete-btn:hover {
+  background: #d90429;
+}
+
+.no-users-message, .loading-message {
+  margin: 2rem 0;
+  text-align: center;
+  color: #888;
+  font-size: 1.1rem;
+}
+
+/* Location Section */
+.location-section {
+  margin: 2rem 0;
+  padding: 2rem;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+.location-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  color: #22223b;
+}
+.map-container {
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+.location-section iframe {
+  width: 100%;
+  min-height: 300px;
+  border: 0;
+  border-radius: 12px;
+  display: block;
+}
+
+/* Change Location UI */
+.change-location-btn {
+  background: #3B82F6;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 0.5rem 1.2rem;
+  font-size: 1rem;
+  font-weight: 500;
+  margin-bottom: 1.2rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.change-location-btn:hover {
+  background: #2563eb;
+}
+.location-form {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.2rem;
+  flex-wrap: wrap;
+}
+.location-input {
+  flex: 1 1 300px;
+  padding: 0.5rem 0.8rem;
+  border: 1px solid #bfc9d1;
+  border-radius: 5px;
+  font-size: 1rem;
+}
+.save-btn {
+  background: #10B981;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  padding: 0.5rem 1.1rem;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.save-btn:hover {
+  background: #059669;
+}
+.cancel-btn {
+  background: #e5e7eb;
+  color: #22223b;
+  border: none;
+  border-radius: 5px;
+  padding: 0.5rem 1.1rem;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.cancel-btn:hover {
+  background: #cbd5e1;
+}
+
 /* Responsive Design */
 @media (max-width: 1024px) {
   .admin-sidebar {
@@ -306,7 +579,7 @@
   }
   
   .kpi-section {
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   }
 }
 
@@ -349,5 +622,27 @@
   
   .kpi-value {
     font-size: 1.5rem;
+  }
+} 
+
+@media (max-width: 700px) {
+  .users-section {
+    padding: 1rem;
+  }
+  .users-table th, .users-table td {
+    padding: 0.5rem 0.6rem;
+    font-size: 0.95rem;
+  }
+  .users-title {
+    font-size: 1.1rem;
+  }
+  .location-section {
+    padding: 1rem;
+  }
+  .map-container {
+    max-width: 100%;
+  }
+  .location-title {
+    font-size: 1.1rem;
   }
 } 

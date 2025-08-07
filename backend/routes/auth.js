@@ -45,4 +45,10 @@ router.post('/profile-image', authenticateToken, upload.single('image'), authCon
 // Debug user data (protected)
 router.get('/debug', authenticateToken, authController.debugUser);
 
+// Get all users (admin only)
+router.get('/users', authenticateToken, authController.getAllUsers);
+
+// Delete any user by admin (admin only)
+router.delete('/user/:id', authenticateToken, authController.deleteUserByAdmin);
+
 module.exports = router; 

@@ -3,11 +3,13 @@ import './Header.css';
 import fwLogo from '../assets/logo.png';
 import HamburgerMenu from './HamburgerMenu';
 import { Link } from 'react-router-dom';
-import userIcon from '../assets/user(1).png'; 
+import userIcon from '../assets/user(1).png';
+import { useCart } from '../contexts/CartContext';
 
 const Header = () => {
   const [whiteText, setWhiteText] = useState(false);
   const headerRef = useRef(null);
+  const { getCartCount } = useCart();
 
   // Get user info from localStorage
   const user = JSON.parse(localStorage.getItem('user')) || {};
@@ -58,7 +60,9 @@ const Header = () => {
               <Link to="/login">LOGIN</Link>
             )}
             <a href="#help">HELP</a>
-            <a href="#cart">FURNI BAG [0]</a>
+            <Link to="/cart" className="header__cart-link">
+              FURNI BAG [{getCartCount()}]
+            </Link>
           </nav>
         </div>
       </div>

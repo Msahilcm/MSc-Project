@@ -1,84 +1,243 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AdminHeader from './AdminHeader';
 import AdminProductManagement from './AdminProductManagement';
+import { productAPI, authAPI, orderAPI } from '../services/api';
 import './AdminDashboard.css';
 
 const AdminDashboard = () => {
   const [activeMenuItem, setActiveMenuItem] = useState('Dashboard');
+  const [dashboardData, setDashboardData] = useState({
+    totalProducts: 0,
+    totalOrders: 0,
+    totalUsers: 0
+  });
+  const [orderStats, setOrderStats] = useState({
+    today: { count: 0, total: 0 },
+    month: { count: 0, total: 0 },
+    year: { count: 0, total: 0 }
+  });
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+
+  // Fetch dashboard data
+  const fetchDashboardData = async () => {
+    try {
+      setLoading(true);
+      
+      // Get admin token
+      const adminToken = localStorage.getItem('adminToken');
+      
+      // Fetch products to get total count
+      const productsResponse = await productAPI.getAllProducts();
+      const totalProducts = productsResponse.success ? (productsResponse.data?.length || 0) : 0;
+      
+      // Fetch orders to get total count and statistics
+      let totalOrders = 0;
+      let orderStatistics = { today: { count: 0, total: 0 }, month: { count: 0, total: 0 }, year: { count: 0, total: 0 } };
+      if (adminToken) {
+        try {
+          const ordersResponse = await orderAPI.getAllOrders(adminToken);
+          totalOrders = ordersResponse.success ? (ordersResponse.data?.length || 0) : 0;
+          
+          // Get order statistics
+          const statsResponse = await orderAPI.getOrderStatistics(adminToken);
+          if (statsResponse.success && statsResponse.data) {
+            orderStatistics = statsResponse.data;
+          }
+        } catch (error) {
+          console.error('Error fetching orders:', error);
+          totalOrders = 0; // Fallback to 0 if API fails
+        }
+      }
+      
+      // Fetch users to get total count
+      let totalUsers = 0;
+      if (adminToken) {
+        try {
+          const usersResponse = await authAPI.getAllUsers(adminToken);
+          totalUsers = usersResponse.success ? (usersResponse.data?.length || 0) : 0;
+        } catch (error) {
+          console.error('Error fetching users:', error);
+          totalUsers = 0; // Fallback to 0 if API fails
+        }
+      }
+      
+      setDashboardData({
+        totalProducts,
+        totalOrders,
+        totalUsers
+      });
+      setOrderStats(orderStatistics);
+    } catch (error) {
+      console.error('Error fetching dashboard data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
+
+  // Function to refresh dashboard data (can be called from other components)
+  const refreshDashboard = () => {
+    fetchDashboardData();
+  };
+
+  const [recentOrders, setRecentOrders] = useState([]);
+  const [users, setUsers] = useState([]);
+  const [usersLoading, setUsersLoading] = useState(false);
+  const [locationUrl, setLocationUrl] = useState("https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d39697.304644975295!2d-0.12707457832033378!3d51.5484038!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x48761d0069e89807%3A0xe2aeaf20c6d96ba9!2sDISCOUNT%20FURNITURE%20STORE!5e0!3m2!1sen!2suk!4v1754382653712!5m2!1sen!2suk");
+  const [showLocationForm, setShowLocationForm] = useState(false);
+  const [locationInput, setLocationInput] = useState(locationUrl);
+
+  // Fetch recent orders
+  useEffect(() => {
+    const fetchRecentOrders = async () => {
+      try {
+        const adminToken = localStorage.getItem('adminToken');
+        if (adminToken) {
+          const ordersResponse = await orderAPI.getAllOrders(adminToken);
+          if (ordersResponse.success && ordersResponse.data) {
+            const recent = ordersResponse.data
+              .slice(0, 4) // Show only first 4 orders
+              .map(order => ({
+                id: order.id,
+                customerName: order.user_name || 'Unknown',
+                productName: order.product_name || 'Unknown Product',
+                quantity: order.quantity?.toString() || '1',
+                totalAmount: `$${order.total_amount}`,
+                status: order.status || 'pending',
+                orderDate: new Date(order.created_at).toLocaleDateString()
+              }));
+            setRecentOrders(recent);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching recent orders:', error);
+      }
+    };
+
+    fetchRecentOrders();
+  }, []);
+
+  // Fetch users
+  const fetchUsers = async () => {
+    setUsersLoading(true);
+    try {
+      const adminToken = localStorage.getItem('adminToken');
+      if (adminToken) {
+        const usersResponse = await authAPI.getAllUsers(adminToken);
+        if (usersResponse.success && usersResponse.data) {
+          setUsers(usersResponse.data);
+        } else {
+          setUsers([]);
+        }
+      }
+    } catch (error) {
+      setUsers([]);
+      console.error('Error fetching users:', error);
+    } finally {
+      setUsersLoading(false);
+    }
+  };
+
+  // Delete user
+  const handleDeleteUser = async (userId) => {
+    if (!window.confirm('Are you sure you want to delete this user?')) return;
+    try {
+      const adminToken = localStorage.getItem('adminToken');
+      if (adminToken) {
+        const response = await fetch(`${process.env.REACT_APP_API_BASE_URL || "http://localhost:5000/api"}/auth/user/${userId}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${adminToken}` }
+        });
+        const result = await response.json();
+        if (result.success) {
+          setUsers(users => users.filter(u => u.id !== userId));
+        } else {
+          alert(result.message || 'Failed to delete user');
+        }
+      }
+    } catch (error) {
+      alert('Failed to delete user');
+    }
+  };
+
+  // Function to handle KPI card clicks
+  const handleKPIClick = (cardTitle) => {
+    switch (cardTitle) {
+      case 'TOTAL PRODUCTS':
+        setActiveMenuItem('Products');
+        break;
+      case 'TODAY ORDERS':
+      case 'THIS MONTH':
+      case 'THIS YEAR':
+        // Could navigate to detailed order reports
+        console.log(`Clicked on ${cardTitle}`);
+        break;
+      case 'TOTAL USERS':
+        setActiveMenuItem('Customers');
+        fetchUsers();
+        break;
+      default:
+        break;
+    }
+  };
 
   const menuItems = [
     { name: 'Dashboard', icon: '📊' },
     { name: 'Products', icon: '📦' },
-    { name: 'Categories', icon: '📂' },
     { name: 'Locations', icon: '📍' },
     { name: 'Customers', icon: '👥' }
   ];
 
+  const handleMenuClick = (itemName) => {
+    setActiveMenuItem(itemName);
+    if (itemName === 'Customers') {
+      fetchUsers();
+    }
+  };
+
   const kpiCards = [
     {
-      title: 'ORDER PENDING',
-      value: '2',
-      icon: '🔄',
-      color: '#8B5CF6',
-      bgColor: '#F3F4F6'
-    },
-    {
-      title: 'ORDER CANCEL',
-      value: '0',
-      icon: '❌',
-      color: '#EF4444',
-      bgColor: '#FEF2F2'
-    },
-    {
-      title: 'ORDER PROCESS',
-      value: '5',
-      icon: '⚙️',
+      title: 'TOTAL PRODUCTS',
+      value: loading ? '...' : dashboardData.totalProducts.toString(),
+      icon: '📦',
       color: '#3B82F6',
       bgColor: '#EFF6FF'
     },
     {
-      title: 'TODAY INCOME',
-      value: '$9568.00',
-      icon: '💰',
+      title: 'TODAY ORDERS',
+      value: loading ? '...' : orderStats.today.count.toString(),
+      subtitle: `$${orderStats.today.total.toFixed(2)}`,
+      icon: '📅',
+      color: '#8B5CF6',
+      bgColor: '#F3F4F6'
+    },
+    {
+      title: 'THIS MONTH',
+      value: loading ? '...' : orderStats.month.count.toString(),
+      subtitle: `$${orderStats.month.total.toFixed(2)}`,
+      icon: '📊',
       color: '#10B981',
       bgColor: '#ECFDF5'
-    }
-  ];
-
-  const recentOrders = [
-    {
-      orderId: '109012366687',
-      paymentMethod: 'cash',
-      orderDate: 'September 14th 2020 4:34:12 pm',
-      deliveryDate: '',
-      status: 'processing',
-      total: '₹1815'
     },
     {
-      orderId: '553840047075',
-      paymentMethod: 'card',
-      orderDate: 'September 14th 2020 3:45:22 pm',
-      deliveryDate: '',
-      status: 'processing',
-      total: '₹430'
+      title: 'THIS YEAR',
+      value: loading ? '...' : orderStats.year.count.toString(),
+      subtitle: `$${orderStats.year.total.toFixed(2)}`,
+      icon: '📈',
+      color: '#F59E0B',
+      bgColor: '#FFFBEB'
     },
     {
-      orderId: '109012366688',
-      paymentMethod: 'cash',
-      orderDate: 'September 14th 2020 2:15:10 pm',
-      deliveryDate: '',
-      status: 'processing',
-      total: '₹920'
-    },
-    {
-      orderId: '553840047076',
-      paymentMethod: 'card',
-      orderDate: 'September 14th 2020 1:30:45 pm',
-      deliveryDate: '',
-      status: 'processing',
-      total: '₹1560'
+      title: 'TOTAL USERS',
+      value: loading ? '...' : dashboardData.totalUsers.toString(),
+      icon: '👥',
+      color: '#10B981',
+      bgColor: '#ECFDF5'
     }
   ];
 
@@ -86,13 +245,93 @@ const AdminDashboard = () => {
     switch (activeMenuItem) {
       case 'Products':
         return <AdminProductManagement />;
+      case 'Customers':
+        return (
+          <div className="users-section">
+            <h2 className="users-title">Users</h2>
+            {usersLoading ? (
+              <div className="loading-message">Loading users...</div>
+            ) : users.length > 0 ? (
+              <table className="users-table">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {users.map(user => (
+                    <tr key={user.id}>
+                      <td>{user.id}</td>
+                      <td>{user.name} {user.surname}</td>
+                      <td>{user.email}</td>
+                      <td>
+                        <button className="action-btn delete-btn" onClick={() => handleDeleteUser(user.id)} title="Delete User">❌</button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <div className="no-users-message">No users found.</div>
+            )}
+          </div>
+        );
+      case 'Locations':
+        return (
+          <div className="location-section">
+            <h2 className="location-title">Store Location</h2>
+            <button className="change-location-btn" onClick={() => { setShowLocationForm(true); setLocationInput(locationUrl); }}>
+              Change Location
+            </button>
+            {showLocationForm && (
+              <form className="location-form" onSubmit={e => { e.preventDefault(); setLocationUrl(locationInput); setShowLocationForm(false); }}>
+                <input
+                  type="text"
+                  className="location-input"
+                  value={locationInput}
+                  onChange={e => setLocationInput(e.target.value)}
+                  placeholder="Paste Google Maps embed URL here"
+                  required
+                />
+                <button type="submit" className="save-btn">Save</button>
+                <button type="button" className="cancel-btn" onClick={() => setShowLocationForm(false)}>Cancel</button>
+              </form>
+            )}
+            <div className="map-container">
+              <iframe
+                src={locationUrl}
+                width="100%"
+                height="400"
+                style={{ border: 0, borderRadius: '12px', width: '100%', minHeight: '300px' }}
+                allowFullScreen=""
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                title="Store Location"
+              ></iframe>
+            </div>
+          </div>
+        );
       case 'Dashboard':
       default:
         return (
           <>
             <div className="main-header">
-              <h1 className="main-title">Dashboard</h1>
-              <div className="breadcrumb">Dashboard</div>
+              <div className="header-content">
+                <div>
+                  <h1 className="main-title">Dashboard</h1>
+                  <div className="breadcrumb">Dashboard</div>
+                </div>
+                <button 
+                  className="refresh-btn" 
+                  onClick={refreshDashboard}
+                  disabled={loading}
+                >
+                  {loading ? '🔄' : '🔄'} Refresh
+                </button>
+              </div>
             </div>
 
             {/* KPI Cards */}
@@ -100,20 +339,29 @@ const AdminDashboard = () => {
               {kpiCards.map((card, index) => (
                 <div
                   key={index}
-                  className="kpi-card"
+                                     className={`kpi-card ${card.title === 'TOTAL PRODUCTS' || card.title === 'TOTAL USERS' || card.title === 'TODAY ORDERS' || card.title === 'THIS MONTH' || card.title === 'THIS YEAR' ? 'clickable' : ''}`}
                   style={{ backgroundColor: card.bgColor }}
+                  onClick={() => handleKPIClick(card.title)}
                 >
-                  <div className="kpi-content">
-                    <h3 className="kpi-title" style={{ color: card.color }}>
-                      {card.title}
-                    </h3>
-                    <div className="kpi-value" style={{ color: card.color }}>
-                      {card.value}
-                    </div>
-                  </div>
+                                     <div className="kpi-content">
+                     <h3 className="kpi-title" style={{ color: card.color }}>
+                       {card.title}
+                     </h3>
+                     <div className="kpi-value" style={{ color: card.color }}>
+                       {card.value}
+                     </div>
+                     {card.subtitle && (
+                       <div className="kpi-subtitle" style={{ color: card.color, opacity: 0.8 }}>
+                         {card.subtitle}
+                       </div>
+                     )}
+                   </div>
                   <div className="kpi-icon" style={{ color: card.color }}>
                     {card.icon}
                   </div>
+                                     {(card.title === 'TOTAL PRODUCTS' || card.title === 'TOTAL USERS' || card.title === 'TODAY ORDERS' || card.title === 'THIS MONTH' || card.title === 'THIS YEAR') && (
+                     <div className="kpi-hint"></div>
+                   )}
                 </div>
               ))}
             </div>
@@ -126,45 +374,53 @@ const AdminDashboard = () => {
               </div>
               
               <div className="table-container">
-                <table className="orders-table">
-                  <thead>
-                    <tr className="table-header">
-                      <th>Order ID</th>
-                      <th>Payment Method</th>
-                      <th>Order Date</th>
-                      <th>Delivery Date</th>
-                      <th>Status</th>
-                      <th>Total</th>
-                      <th>Action</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {recentOrders.map((order, index) => (
-                      <tr key={index} className="table-row">
-                        <td>{order.orderId}</td>
-                        <td>{order.paymentMethod}</td>
-                        <td>{order.orderDate}</td>
-                        <td>{order.deliveryDate}</td>
-                        <td>
-                          <span className="status-badge processing">
-                            {order.status}
-                          </span>
-                        </td>
-                        <td>{order.total}</td>
-                        <td>
-                          <div className="action-buttons">
-                            <button className="action-btn view-btn" title="View Details">
-                              👁️
-                            </button>
-                            <button className="action-btn edit-btn" title="Edit Order">
-                              ✏️
-                            </button>
-                          </div>
-                        </td>
+                {loading ? (
+                  <div className="loading-message">Loading orders...</div>
+                ) : recentOrders.length > 0 ? (
+                  <table className="orders-table">
+                    <thead>
+                      <tr className="table-header">
+                        <th>Order ID</th>
+                        <th>Customer</th>
+                        <th>Product</th>
+                        <th>Quantity</th>
+                        <th>Total Amount</th>
+                        <th>Status</th>
+                        <th>Order Date</th>
+                        <th>Action</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {recentOrders.map((order, index) => (
+                        <tr key={index} className="table-row">
+                          <td>#{order.id}</td>
+                          <td>{order.customerName}</td>
+                          <td>{order.productName}</td>
+                          <td>{order.quantity}</td>
+                          <td>{order.totalAmount}</td>
+                          <td>
+                            <span className={`status-badge ${order.status}`}>
+                              {order.status}
+                            </span>
+                          </td>
+                          <td>{order.orderDate}</td>
+                          <td>
+                            <div className="action-buttons">
+                              <button className="action-btn view-btn" title="View Details">
+                                👁️
+                              </button>
+                              <button className="action-btn edit-btn" title="Update Status">
+                                ✏️
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                ) : (
+                  <div className="no-orders-message">No orders found. Orders will appear here when customers place them!</div>
+                )}
               </div>
             </div>
           </>
@@ -185,7 +441,7 @@ const AdminDashboard = () => {
                 <button
                   key={item.name}
                   className={`nav-item ${activeMenuItem === item.name ? 'active' : ''}`}
-                  onClick={() => setActiveMenuItem(item.name)}
+                  onClick={() => handleMenuClick(item.name)}
                 >
                   <span className="nav-icon">{item.icon}</span>
                   <span className="nav-text">{item.name}</span>
