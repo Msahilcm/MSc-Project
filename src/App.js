@@ -4,6 +4,7 @@ import MainPage from './components/MainPage';
 import ProductPage from './components/ProductPage';
 import ProductDetailPage from './components/ProductDetailPage';
 import LoginFormPage from './components/LoginFormPage';
+import ForgotPassword from './components/ForgotPassword';
 import RegisterFormPage from './components/RegisterFormPage';
 import AdminLogin from './components/AdminLogin';
 import AdminDashboard from './components/AdminDashboard';
@@ -24,6 +25,7 @@ function App() {
           <Route path="/products" element={<ProductPage />} />
           <Route path="/product/:productId" element={<ProductDetailPage />} />
           <Route path="/login" element={<LoginFormPage />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/register" element={<RegisterFormPage />} />
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/admin" element={<ProtectedAdminRoute><AdminDashboard /></ProtectedAdminRoute>} />

@@ -402,6 +402,56 @@ const deleteUserByAdmin = async (req, res) => {
   }
 };
 
+// Forgot password
+const forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email is required'
+      });
+    }
+
+    // Check if user exists
+    const user = await User.findByEmail(email);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'No user found with this email address'
+      });
+    }
+
+    // Generate reset token
+    const resetToken = jwt.sign(
+      { userId: user.id, email },
+      process.env.JWT_SECRET || 'your-secret-key',
+      { expiresIn: '1h' }
+    );
+
+    // In a real implementation, you would:
+    // 1. Store the reset token in the database with an expiration
+    // 2. Send an email with the reset link
+    // 3. Create a reset password page
+
+    console.log(`Password reset requested for ${email}. Reset token: ${resetToken}`);
+
+    res.json({
+      success: true,
+      message: 'Password reset email sent successfully'
+    });
+
+  } catch (error) {
+    console.error('Forgot password error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to process password reset request',
+      error: error.message
+    });
+  }
+};
+
 module.exports = {
   register,
   login,
@@ -412,5 +462,6 @@ module.exports = {
   uploadProfileImage,
   debugUser,
   getAllUsers,
-  deleteUserByAdmin
+  deleteUserByAdmin,
+  forgotPassword
 }; 

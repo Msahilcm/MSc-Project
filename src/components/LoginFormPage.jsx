@@ -91,7 +91,9 @@ const LoginFormPage = () => {
             required
           />
           {error && <div className="error-message">{error}</div>}
-          <div className="forgot-password">Have you forgotten your password?</div>
+          <div className="forgot-password" onClick={() => navigate('/forgot-password')}>
+            Have you forgotten your password?
+          </div>
           <button type="submit" className="login-btn" disabled={loading}>
             {loading ? 'LOGGING IN...' : 'LOG IN'}
           </button>

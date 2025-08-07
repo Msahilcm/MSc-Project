@@ -27,6 +27,9 @@ router.post('/register', registerValidation, authController.register);
 // Login route (unified for both regular users and admin)
 router.post('/login', loginValidation, authController.login);
 
+// Forgot password route
+router.post('/forgot-password', authController.forgotPassword);
+
 // Get user profile (protected route)
 router.get('/profile', authenticateToken, authController.getProfile);
 
