@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import './Header.css';
 import fwLogo from '../assets/logo.png';
 import HamburgerMenu from './HamburgerMenu';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import userIcon from '../assets/user(1).png';
 import { useCart } from '../contexts/CartContext';
 
@@ -10,6 +10,8 @@ const Header = () => {
   const [whiteText, setWhiteText] = useState(false);
   const headerRef = useRef(null);
   const { getCartCount } = useCart();
+  const navigate = useNavigate();
+  const [search, setSearch] = useState('');
 
   // Get user info from localStorage
   const user = JSON.parse(localStorage.getItem('user')) || {};
@@ -49,7 +51,22 @@ const Header = () => {
         </div>
         <div className="header__right">
           <div className="header__search">
-            <input type="text" placeholder="SEARCH" />
+            <input
+              type="text"
+              placeholder="SEARCH"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  const q = search.trim();
+                  if (q) {
+                    navigate(`/products?q=${encodeURIComponent(q)}`);
+                  } else {
+                    navigate('/products');
+                  }
+                }
+              }}
+            />
           </div>
           <nav className="header__nav--top">
             {localStorage.getItem('token') ? (
@@ -59,7 +76,7 @@ const Header = () => {
             ) : (
               <Link to="/login">LOGIN</Link>
             )}
-            <a href="#help">HELP</a>
+            <Link to="/help">HELP</Link>
             <Link to="/cart" className="header__cart-link">
               FURNI BAG [{getCartCount()}]
             </Link>

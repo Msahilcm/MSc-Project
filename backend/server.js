@@ -5,6 +5,7 @@ const authRoutes = require('./routes/auth');
 const productRoutes = require('./routes/products');
 const orderRoutes = require('./routes/orders');
 const favoriteRoutes = require('./routes/favorites');
+const addressRoutes = require('./routes/addresses');
 const { initDatabase } = require('./config/database');
 const path = require('path');
 
@@ -25,6 +26,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/favorites', favoriteRoutes);
+app.use('/api/addresses', addressRoutes);
 
 // Health check route
 app.get('/api/health', (req, res) => {

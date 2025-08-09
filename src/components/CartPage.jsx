@@ -34,13 +34,48 @@ const CartPage = () => {
     }
   };
 
-  const handleCheckout = () => {
+  const handleCheckout = async () => {
     if (cartItems.length === 0) {
       alert('Your cart is empty!');
       return;
     }
-    // TODO: Implement checkout functionality
-    alert('Checkout functionality coming soon!');
+
+    const token = localStorage.getItem('token');
+    if (!token) {
+      alert('Please log in to place an order.');
+      navigate('/login');
+      return;
+    }
+
+    try {
+      for (const item of cartItems) {
+        const orderPayload = {
+          productId: item.id,
+          quantity: item.quantity,
+          totalAmount: Number((item.price * item.quantity).toFixed(2)),
+          shippingAddress: 'TBD - collected during checkout'
+        };
+
+        const response = await fetch('http://localhost:5000/api/orders', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(orderPayload)
+        });
+        const data = await response.json();
+        if (!response.ok || !data.success) {
+          throw new Error(data.message || 'Failed to create order');
+        }
+      }
+
+      alert('Proceeding to checkout...');
+      navigate('/checkout');
+    } catch (error) {
+      console.error('Checkout error:', error);
+      alert('Failed to place order. Please try again.');
+    }
   };
 
   const getImageSrc = (imagePath) => {

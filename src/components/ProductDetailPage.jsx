@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import Header from './Header';
 import { productAPI } from '../services/api';
 import { useCart } from '../contexts/CartContext';
@@ -21,6 +21,7 @@ const ProductDetailPage = () => {
   const [reviewSubmitError, setReviewSubmitError] = useState(null);
   const [reviewSubmitSuccess, setReviewSubmitSuccess] = useState(null);
   const { addToCart } = useCart();
+  const navigate = useNavigate();
 
   // Robust userName fallback logic
   let userName = localStorage.getItem('userName') || '';
@@ -432,12 +433,18 @@ const ProductDetailPage = () => {
 
                              {/* Action Buttons */}
                <div className="action-buttons">
-                 <button 
+                  <button 
                    className="buy-now-btn" 
                    disabled={getSelectedColorStock() === 0}
-                 >
-                   {getSelectedColorStock() === 0 ? 'Out of Stock' : 'Buy Now'}
-                 </button>
+                   onClick={() => {
+                     if (!product) return;
+                     if (!selectedColor) return;
+                     addToCart(product, 1, selectedColor);
+                     navigate('/checkout');
+                   }}
+                  >
+                    {getSelectedColorStock() === 0 ? 'Out of Stock' : 'Buy Now'}
+                  </button>
                  <button 
                    className="add-to-cart-btn" 
                    disabled={getSelectedColorStock() === 0}

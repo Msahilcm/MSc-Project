@@ -372,3 +372,50 @@ export const favoriteAPI = {
     }
   }
 }; 
+
+// Address API calls
+export const addressAPI = {
+  list: async (token) => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/addresses`, { headers: { 'Authorization': `Bearer ${token}` } });
+      return await res.json();
+    } catch (e) {
+      return { success: false, message: e.message };
+    }
+  },
+  create: async (address, token) => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/addresses`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify(address)
+      });
+      return await res.json();
+    } catch (e) {
+      return { success: false, message: e.message };
+    }
+  },
+  update: async (id, patch, token) => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/addresses/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify(patch)
+      });
+      return await res.json();
+    } catch (e) {
+      return { success: false, message: e.message };
+    }
+  },
+  remove: async (id, token) => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/addresses/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      return await res.json();
+    } catch (e) {
+      return { success: false, message: e.message };
+    }
+  }
+};

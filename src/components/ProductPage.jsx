@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Header from './Header';
 import ProductHeroBanner from './ProductHeroBanner';
 import ProductFilterBar from './ProductFilterBar';
 import ProductGrid from './ProductGrid';
 import './ProductPage.css';
+import { useLocation } from 'react-router-dom';
 
 const ProductPage = () => {
   const [selectedFilters, setSelectedFilters] = useState({
@@ -15,6 +16,19 @@ const ProductPage = () => {
     offer: ''
   });
   const [sortBy, setSortBy] = useState('');
+  const location = useLocation();
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const category = params.get('category');
+    const q = params.get('q');
+    if (category) {
+      setSelectedFilters(prev => ({ ...prev, category }));
+    }
+    if (q) {
+      setSelectedFilters(prev => ({ ...prev, q }));
+    }
+  }, [location.search]);
 
   const handleFilterChange = (filterType, value) => {
     setSelectedFilters(prev => ({

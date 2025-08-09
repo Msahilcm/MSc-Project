@@ -95,6 +95,25 @@ const initDatabase = async () => {
       )
     `);
 
+    // Create addresses table
+    await connection.execute(`
+      CREATE TABLE IF NOT EXISTS addresses (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT NOT NULL,
+        full_name VARCHAR(255) NOT NULL,
+        line1 VARCHAR(255) NOT NULL,
+        line2 VARCHAR(255),
+        city VARCHAR(120) NOT NULL,
+        postal_code VARCHAR(40) NOT NULL,
+        country VARCHAR(120) NOT NULL,
+        phone VARCHAR(40),
+        is_default BOOLEAN DEFAULT FALSE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+      )
+    `);
+
     // Check if admin user exists, if not create one
     const [adminUsers] = await connection.execute(
       'SELECT * FROM users WHERE email = ?',

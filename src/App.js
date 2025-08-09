@@ -13,6 +13,9 @@ import ProtectedAdminRoute from './components/ProtectedAdminRoute';
 import UserProfilePage from './components/UserProfilePage';
 import FavoritesPage from './components/FavoritesPage';
 import CartPage from './components/CartPage';
+import CheckoutPage from './components/CheckoutPage';
+import ComingSoonPage from './components/ComingSoonPage';
+import HelpPage from './components/HelpPage';
 import { CartProvider } from './contexts/CartContext';
 import './App.css';
 
@@ -33,6 +36,9 @@ function App() {
           <Route path="/profile" element={<UserProfilePage />} />
           <Route path="/favorites" element={<FavoritesPage />} />
           <Route path="/cart" element={<CartPage />} />
+          <Route path="/checkout" element={<CheckoutPage />} />
+          <Route path="/coming-soon" element={<ComingSoonPage />} />
+          <Route path="/help" element={<HelpPage />} />
         </Routes>
       </BrowserRouter>
     </CartProvider>

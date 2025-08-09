@@ -18,7 +18,12 @@ const AdminDashboard = () => {
     year: { count: 0, total: 0 }
   });
   const [loading, setLoading] = useState(true);
+  const [reportsLoading, setReportsLoading] = useState(false);
+  const [allOrders, setAllOrders] = useState([]);
+  const [reportFilter, setReportFilter] = useState('today'); // 'today' | 'month' | 'year' | 'all'
   const navigate = useNavigate();
+
+  const formatCurrency = (n) => `$${Number(n || 0).toFixed(2)}`;
 
   // Fetch dashboard data
   const fetchDashboardData = async () => {
@@ -34,16 +39,30 @@ const AdminDashboard = () => {
       
       // Fetch orders to get total count and statistics
       let totalOrders = 0;
-      let orderStatistics = { today: { count: 0, total: 0 }, month: { count: 0, total: 0 }, year: { count: 0, total: 0 } };
+      let orderStatistics = { today: { count: 0, total: 0, items: 0 }, month: { count: 0, total: 0, items: 0 }, year: { count: 0, total: 0, items: 0 } };
+      const computeStatsFromOrders = (orders = []) => {
+        const sumReduce = (arr, pred) => arr.filter(pred).reduce((acc, o) => {
+          const amt = Number(o.total_amount || 0);
+          const qty = Number(o.quantity || 0);
+          return { count: acc.count + 1, total: acc.total + amt, items: acc.items + qty };
+        }, { count: 0, total: 0, items: 0 });
+        const now = new Date();
+        const isToday = (d) => d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth() && d.getDate() === now.getDate();
+        const isThisMonth = (d) => d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
+        const isThisYear = (d) => d.getFullYear() === now.getFullYear();
+        const todayStats = sumReduce(orders, o => isToday(new Date(o.created_at)));
+        const monthStats = sumReduce(orders, o => isThisMonth(new Date(o.created_at)));
+        const yearStats = sumReduce(orders, o => isThisYear(new Date(o.created_at)));
+        return { today: todayStats, month: monthStats, year: yearStats };
+      };
       if (adminToken) {
         try {
           const ordersResponse = await orderAPI.getAllOrders(adminToken);
           totalOrders = ordersResponse.success ? (ordersResponse.data?.length || 0) : 0;
           
-          // Get order statistics
-          const statsResponse = await orderAPI.getOrderStatistics(adminToken);
-          if (statsResponse.success && statsResponse.data) {
-            orderStatistics = statsResponse.data;
+          // Compute statistics from the same dataset to avoid timezone or API mismatch
+          if (ordersResponse.success && Array.isArray(ordersResponse.data)) {
+            orderStatistics = computeStatsFromOrders(ordersResponse.data);
           }
         } catch (error) {
           console.error('Error fetching orders:', error);
@@ -172,10 +191,19 @@ const AdminDashboard = () => {
         setActiveMenuItem('Products');
         break;
       case 'TODAY ORDERS':
+        setActiveMenuItem('Reports');
+        setReportFilter('today');
+        fetchAllOrdersForReports();
+        break;
       case 'THIS MONTH':
+        setActiveMenuItem('Reports');
+        setReportFilter('month');
+        fetchAllOrdersForReports();
+        break;
       case 'THIS YEAR':
-        // Could navigate to detailed order reports
-        console.log(`Clicked on ${cardTitle}`);
+        setActiveMenuItem('Reports');
+        setReportFilter('year');
+        fetchAllOrdersForReports();
         break;
       case 'TOTAL USERS':
         setActiveMenuItem('Customers');
@@ -190,7 +218,8 @@ const AdminDashboard = () => {
     { name: 'Dashboard', icon: '📊' },
     { name: 'Products', icon: '📦' },
     { name: 'Locations', icon: '📍' },
-    { name: 'Customers', icon: '👥' }
+    { name: 'Customers', icon: '👥' },
+    { name: 'Reports', icon: '🧾' }
   ];
 
   const handleMenuClick = (itemName) => {
@@ -198,6 +227,43 @@ const AdminDashboard = () => {
     if (itemName === 'Customers') {
       fetchUsers();
     }
+    if (itemName === 'Reports') {
+      fetchAllOrdersForReports();
+    }
+  };
+
+  const fetchAllOrdersForReports = async () => {
+    try {
+      setReportsLoading(true);
+      const adminToken = localStorage.getItem('adminToken');
+      if (!adminToken) { setAllOrders([]); return; }
+      const ordersResponse = await orderAPI.getAllOrders(adminToken);
+      if (ordersResponse.success && Array.isArray(ordersResponse.data)) {
+        setAllOrders(ordersResponse.data);
+      } else {
+        setAllOrders([]);
+      }
+    } catch (e) {
+      setAllOrders([]);
+    } finally {
+      setReportsLoading(false);
+    }
+  };
+
+  const isInPeriod = (iso, period) => {
+    const d = new Date(iso);
+    const now = new Date();
+    if (period === 'all') return true;
+    if (period === 'today') {
+      return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth() && d.getDate() === now.getDate();
+    }
+    if (period === 'month') {
+      return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
+    }
+    if (period === 'year') {
+      return d.getFullYear() === now.getFullYear();
+    }
+    return true;
   };
 
   const kpiCards = [
@@ -210,24 +276,24 @@ const AdminDashboard = () => {
     },
     {
       title: 'TODAY ORDERS',
-      value: loading ? '...' : orderStats.today.count.toString(),
-      subtitle: `$${orderStats.today.total.toFixed(2)}`,
+      value: loading ? '...' : formatCurrency(orderStats.today.total),
+      subtitle: `${orderStats.today.count} orders • ${orderStats.today.items || 0} items`,
       icon: '📅',
       color: '#8B5CF6',
       bgColor: '#F3F4F6'
     },
     {
       title: 'THIS MONTH',
-      value: loading ? '...' : orderStats.month.count.toString(),
-      subtitle: `$${orderStats.month.total.toFixed(2)}`,
+      value: loading ? '...' : formatCurrency(orderStats.month.total),
+      subtitle: `${orderStats.month.count} orders • ${orderStats.month.items || 0} items`,
       icon: '📊',
       color: '#10B981',
       bgColor: '#ECFDF5'
     },
     {
       title: 'THIS YEAR',
-      value: loading ? '...' : orderStats.year.count.toString(),
-      subtitle: `$${orderStats.year.total.toFixed(2)}`,
+      value: loading ? '...' : formatCurrency(orderStats.year.total),
+      subtitle: `${orderStats.year.count} orders • ${orderStats.year.items || 0} items`,
       icon: '📈',
       color: '#F59E0B',
       bgColor: '#FFFBEB'
@@ -424,6 +490,55 @@ const AdminDashboard = () => {
               </div>
             </div>
           </>
+        );
+      case 'Reports':
+        return (
+          <div className="reports-section">
+            <div className="reports-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>
+                <h2 className="orders-title">Order Reports</h2>
+                <div className="breadcrumb">Reports</div>
+              </div>
+              <div className="report-filters" style={{ display: 'flex', gap: 8 }}>
+                <button className={`btn ${reportFilter === 'today' ? 'btn-primary' : ''}`} onClick={() => setReportFilter('today')}>Today</button>
+                <button className={`btn ${reportFilter === 'month' ? 'btn-primary' : ''}`} onClick={() => setReportFilter('month')}>This Month</button>
+                <button className={`btn ${reportFilter === 'year' ? 'btn-primary' : ''}`} onClick={() => setReportFilter('year')}>This Year</button>
+                <button className={`btn ${reportFilter === 'all' ? 'btn-primary' : ''}`} onClick={() => setReportFilter('all')}>All</button>
+              </div>
+            </div>
+            <div className="table-container" style={{ marginTop: 16 }}>
+              {reportsLoading ? (
+                <div className="loading-message">Loading report...</div>
+              ) : (
+                <table className="orders-table">
+                  <thead>
+                    <tr className="table-header">
+                      <th>Order ID</th>
+                      <th>Customer</th>
+                      <th>Product</th>
+                      <th>Quantity</th>
+                      <th>Total Amount</th>
+                      <th>Status</th>
+                      <th>Order Date</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {allOrders.filter(o => isInPeriod(o.created_at, reportFilter)).map((o, idx) => (
+                      <tr key={idx} className="table-row">
+                        <td>#{o.id}</td>
+                        <td>{o.user_name || 'Unknown'}</td>
+                        <td>{o.product_name || 'Unknown Product'}</td>
+                        <td>{o.quantity}</td>
+                        <td>${o.total_amount}</td>
+                        <td><span className={`status-badge ${o.status}`}>{o.status}</span></td>
+                        <td>{new Date(o.created_at).toLocaleString()}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
+          </div>
         );
     }
   };

@@ -32,9 +32,28 @@ const ProductGrid = ({ selectedFilters, sortBy }) => {
 
   // Filter products based on selected filters
   const filteredProducts = products.filter(product => {
-    // Furniture filter (category)
-    if (selectedFilters.category && product.category !== selectedFilters.category) {
-      return false;
+    // Furniture filter (category) — allow case-insensitive match and whitespace normalization
+    if (selectedFilters.category) {
+      const sel = String(selectedFilters.category).toLowerCase().trim();
+      const cat = String(product.category || '').toLowerCase().trim();
+      if (sel && sel !== cat) {
+        return false;
+      }
+    }
+
+    // Global search filter across name, category, description
+    if (selectedFilters.q) {
+      const q = String(selectedFilters.q).toLowerCase().trim();
+      if (q) {
+        const hay = [
+          String(product.name || ''),
+          String(product.category || ''),
+          String(product.description || '')
+        ].join(' ').toLowerCase();
+        if (!hay.includes(q)) {
+          return false;
+        }
+      }
     }
 
     // Price filter

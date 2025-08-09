@@ -124,20 +124,20 @@ class Order {
   static async getOrderStatistics() {
     try {
       const [todayOrders] = await pool.execute(`
-        SELECT COUNT(*) as count, SUM(total_amount) as total
+        SELECT COUNT(*) as count, SUM(total_amount) as total, SUM(quantity) as items
         FROM orders 
         WHERE DATE(created_at) = CURDATE()
       `);
 
       const [monthOrders] = await pool.execute(`
-        SELECT COUNT(*) as count, SUM(total_amount) as total
+        SELECT COUNT(*) as count, SUM(total_amount) as total, SUM(quantity) as items
         FROM orders 
         WHERE YEAR(created_at) = YEAR(CURDATE()) 
         AND MONTH(created_at) = MONTH(CURDATE())
       `);
 
       const [yearOrders] = await pool.execute(`
-        SELECT COUNT(*) as count, SUM(total_amount) as total
+        SELECT COUNT(*) as count, SUM(total_amount) as total, SUM(quantity) as items
         FROM orders 
         WHERE YEAR(created_at) = YEAR(CURDATE())
       `);
@@ -145,15 +145,18 @@ class Order {
       return {
         today: {
           count: todayOrders[0].count || 0,
-          total: todayOrders[0].total || 0
+          total: todayOrders[0].total || 0,
+          items: todayOrders[0].items || 0
         },
         month: {
           count: monthOrders[0].count || 0,
-          total: monthOrders[0].total || 0
+          total: monthOrders[0].total || 0,
+          items: monthOrders[0].items || 0
         },
         year: {
           count: yearOrders[0].count || 0,
-          total: yearOrders[0].total || 0
+          total: yearOrders[0].total || 0,
+          items: yearOrders[0].items || 0
         }
       };
     } catch (error) {
