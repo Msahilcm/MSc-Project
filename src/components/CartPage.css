@@ -7,7 +7,7 @@
   max-width: 1200px;
   margin: 0 auto;
   padding: 2rem;
-  margin-top: 2rem;
+  margin-top: 140px; /* push content below fixed header */
 }
 
 .cart-header {
